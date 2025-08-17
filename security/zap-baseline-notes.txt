@@ -1,0 +1,12 @@
+# To run ZAP Baseline scan against staging (example):
+# docker run --rm -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t https://staging.your-domain.com -m 5 -r zap_report.html
+# In GitHub Actions, add a step after deployment, then upload the artifact:
+#   - name: ZAP Baseline
+#     run: |
+#       docker run --rm -v ${{ github.workspace }}:/zap/wrk -t ghcr.io/zaproxy/zaproxy:stable \
+#         zap-baseline.py -t https://${{ secrets.STAGING_HOSTNAME }} -m 5 -r zap_report.html || true
+#   - name: Upload ZAP report
+#     uses: actions/upload-artifact@v4
+#     with:
+#       name: zap_report
+#       path: zap_report.html

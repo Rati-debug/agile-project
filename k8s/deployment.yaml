@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: college-erp
+  labels: { app: college-erp }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: college-erp }
+  template:
+    metadata:
+      labels: { app: college-erp }
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/your-org/college-erp:latest
+          ports: [{ containerPort: 8000 }]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: CollegeERP.settings
+            - name: DJANGO_ALLOWED_HOSTS
+              value: "erp.example.com"
+            - name: DB_ENGINE
+              value: "django.db.backends.postgresql"
+            - name: DB_NAME
+              value: "erp"
+            - name: DB_USER
+              value: "erpuser"
+            - name: DB_HOST
+              value: "postgres.default.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+          envFrom:
+            - secretRef:
+                name: college-erp-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: college-erp
+  labels: { app: college-erp }
+spec:
+  type: ClusterIP
+  selector: { app: college-erp }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000

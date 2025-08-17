@@ -1,0 +1,34 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/your-org/college-erp
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+env:
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "erp.example.com"
+  DB_ENGINE: "django.db.backends.postgresql"
+  DB_NAME: "erp"
+  DB_USER: "erpuser"
+  DB_HOST: "postgres.default.svc.cluster.local"
+  DB_PORT: "5432"
+
+secrets:
+  DJANGO_SECRET_KEY: "change-me"
+  DB_PASSWORD: "changeme"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - erp.example.com
+  tls:
+    - secretName: erp-tls
+      hosts:
+        - erp.example.com

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "college-erp.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "college-erp.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "college-erp.name" . }}
+    spec:
+      containers:
+        - name: web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /admin/login/, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /admin/login/, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: "CollegeERP.settings"
+{{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: "{{ $val }}"
+{{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "college-erp.fullname" . }}-secrets
